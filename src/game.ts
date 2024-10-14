@@ -41,8 +41,9 @@ for (let i = 'N'.charCodeAt(0) + 1; i <= 'Z'.charCodeAt(0); i++) {
 interface Block {
   letter: string
   dom: HTMLDivElement
-  x: number
-  y: number
+  interactObj: ReturnType<typeof interact>
+  gridX: number
+  gridY: number
   width: number
   height: number
 }
@@ -58,6 +59,7 @@ export class Game {
   private boardDom!: HTMLDivElement
   private stepsDom!: HTMLSpanElement
   private isGameOver = false
+  private timer!: number
 
   public get currentLevel(): number {
     return this.level.level
@@ -110,11 +112,11 @@ export class Game {
           this.pieces[block] = {
             letter: block,
             dom: this.createPiece(src, x + 1, y + 1, width, height),
-            x,
-            y,
+            gridX: x,
+            gridY: y,
             width,
             height
-          }
+          } as any
           this.addListenMove(this.pieces[block])
         }
       }
@@ -124,11 +126,8 @@ export class Game {
 
   private hahaha() {
     try {
-      const timer = setInterval(() => {
-        if (this.isGameOver) {
-          clearInterval(timer)
-          return
-        }
+      clearInterval(this.timer)
+      this.timer = setInterval(() => {
         if (this.stepsDom.innerText !== this._steps + '') {
           //@ts-ignore
           window[atob('ZXZhbA==')](`document.getElementById('steps').innerText=${this._steps}`)
@@ -140,23 +139,23 @@ export class Game {
     } catch (error) {}
   }
 
-  addListenMove(block: Block) {
-    const { letter, dom, x, y, width, height } = block
+  private addListenMove(block: Block) {
+    const { letter, dom, gridX: x, gridY: y, width, height } = block
     let moveSteps: [number, number, number, number] = [0, 0, 0, 0]
     let currentGridX = x,
-      currentGirdY = y
+      currentGridY = y
     let originalX: number, originalY: number
     let moveX: undefined | boolean
     let gridWidth: number, gridHeight: number
-    interact(dom).draggable({
+    block.interactObj = interact(dom).draggable({
       listeners: {
         start: event => {
           event.preventDefault()
           dom.style.transition = 'none'
           const gridArea = dom.style.gridArea.split('/')
-          currentGirdY = parseInt(gridArea[0], 10) - 1
+          currentGridY = parseInt(gridArea[0], 10) - 1
           currentGridX = parseInt(gridArea[1], 10) - 1
-          moveSteps = this.getMoveSteps(currentGridX, currentGirdY, width, height)
+          moveSteps = this.getMoveSteps(currentGridX, currentGridY, width, height)
           const rect = dom.getBoundingClientRect()
           originalX = rect.x
           originalY = rect.y
@@ -193,30 +192,32 @@ export class Game {
           console.log(targetRect.x, targetRect.y)
 
           // 计算目标位置
-          const gridX = Math.round(((targetRect.x - rect.x) / rect.width) * this.cols)
-          const gridY = Math.round(((targetRect.y - rect.y) / rect.height) * this.rows)
-          console.log(gridX + 1, gridY + 1)
+          const tx = Math.round(((targetRect.x - rect.x) / rect.width) * this.cols)
+          const ty = Math.round(((targetRect.y - rect.y) / rect.height) * this.rows)
+          console.log(tx + 1, ty + 1)
 
-          if (gridX != currentGridX || gridY != currentGirdY) {
+          if (tx != currentGridX || ty != currentGridY) {
             setTimeout(() => {
-              dom.style.gridArea = `${gridY + 1} / ${gridX + 1} / ${gridY + 1 + height} / ${gridX + 1 + width}`
+              dom.style.gridArea = `${ty + 1} / ${tx + 1} / ${ty + 1 + height} / ${tx + 1 + width}`
               dom.style.transition = 'none'
               dom.style.transform = 'translate(0px, 0px)'
+              block.gridX = tx + 1
+              block.gridY = ty + 1
               this.steps++
               this.checkWin()
             }, 350)
             for (let i = currentGridX; i < currentGridX + width; i++) {
-              for (let j = currentGirdY; j < currentGirdY + height; j++) {
+              for (let j = currentGridY; j < currentGridY + height; j++) {
                 this.boardState[j][i] = null
               }
             }
-            for (let i = gridX; i < gridX + width; i++) {
-              for (let j = gridY; j < gridY + height; j++) {
+            for (let i = tx; i < tx + width; i++) {
+              for (let j = ty; j < ty + height; j++) {
                 this.boardState[j][i] = letter
               }
             }
             console.log(this.boardState)
-            dom.style.transform = `translate(${(gridX / this.cols) * board.clientWidth + rect.x - originalX}px, ${(gridY / this.rows) * board.clientHeight + rect.y - originalY}px)`
+            dom.style.transform = `translate(${(tx / this.cols) * board.clientWidth + rect.x - originalX}px, ${(ty / this.rows) * board.clientHeight + rect.y - originalY}px)`
           } else {
             dom.style.transform = 'translate(0px, 0px)'
           }
@@ -229,8 +230,10 @@ export class Game {
       }
     })
   }
-
-  getMoveSteps(x: number, y: number, width: number, height: number): [number, number, number, number] {
+  /**
+   * 获取移动步数 [x左移,x右移,y上移,y下移]
+   */
+  private getMoveSteps(x: number, y: number, width: number, height: number): [number, number, number, number] {
     const steps: number[] = []
     // const letter = this.boardState[x][y]
     let flag = false
@@ -292,7 +295,7 @@ export class Game {
     // return `<div class="piece" style="grid-area:${y}/${x}/${y + height}/${x + width}">${src.includes('<') ? src : `<img src="${src}" alt="piece" />`} </div>`
     //改为返回dom
     const dom = document.createElement('div')
-    dom.classList.add('piece')
+    dom.classList.add('piece', 'z-10')
     dom.style.gridArea = `${y}/${x}/${y + height}/${x + width}`
     dom.innerHTML = `<img src="${src}" alt="piece" />`
 
@@ -303,6 +306,9 @@ export class Game {
     // 假设胜利条件是 A 块在 (4,1) 和 (4,2)
     if (this.boardState[4][1] === 'A' && this.boardState[4][2] === 'A') {
       // alert('你赢了！')
+      document.getElementById('game-complete-modal')!.style.display = 'flex'
+      document.getElementById('game-complete-steps')!.innerText = this._steps + ''
+      this.endGame()
       return true
     }
     return false
@@ -311,8 +317,47 @@ export class Game {
   //结束游戏
   private endGame() {
     this.isGameOver = true
-    // this.showWinModal = true
-    // this.winModalText = 'Game Over'
+    Object.values(this.pieces).forEach(e => {
+      e.interactObj.unset()
+    })
+  }
+
+  move(x: number, y: number, tx: number, ty: number) {
+    const letter = this.boardState[y][x]!
+    const { width, height, dom, gridX, gridY } = this.pieces[letter]
+    const steps = this.getMoveSteps(x, y, width, height)
+    const board = this.boardDom
+    const rect = board.getBoundingClientRect()
+    const targetRect = dom.getBoundingClientRect()
+    if (tx >= steps[0] + x && tx <= steps[1] + x && ty >= steps[2] + y && ty <= steps[3] + y) {
+      setTimeout(() => {
+        dom.style.gridArea = `${ty + 1} / ${tx + 1} / ${ty + 1 + height} / ${tx + 1 + width}`
+        this.pieces[letter].gridX = tx + 1
+        this.pieces[letter].gridY = ty + 1
+        dom.style.transition = 'none'
+        dom.style.transform = 'translate(0px, 0px)'
+        this.steps++
+        this.checkWin()
+      }, 350)
+      for (let i = gridX; i < gridX + width; i++) {
+        for (let j = gridY; j < gridY + height; j++) {
+          this.boardState[j][i] = null
+        }
+      }
+      for (let i = tx; i < tx + width; i++) {
+        for (let j = ty; j < ty + height; j++) {
+          this.boardState[j][i] = letter
+        }
+      }
+      console.log(this.boardState)
+      dom.style.transform = `translate(${(tx / this.cols) * board.clientWidth + rect.x - targetRect.x}px, ${(ty / this.rows) * board.clientHeight + rect.y - targetRect.y}px)`
+      dom.style.transition = 'all 0.3s ease'
+    } else {
+      throw new Error('移动不合法')
+    }
+  }
+  destroy() {
+    clearInterval(this.timer)
   }
 }
 

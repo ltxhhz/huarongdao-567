@@ -7,15 +7,12 @@ import t_rong from '../public/imgs/t容.png?url'
 import t_dao from '../public/imgs/t道.png?url'
 
 import levelSelectDialog from './level-select-dialog.html?raw'
+import completeDialog from './complete-dialog.html?raw'
 
 import { initBoardFayaa } from './klotski.board.fayaa'
 import { Game } from './game'
 
-// const link = document.createElement('link')
-// link.type = 'text/css'
-// link.href = tailwind
-// document.head.appendChild(link)
-const level = initBoardFayaa[0]
+let game: Game
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <div class="container ">
@@ -31,8 +28,9 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       请选择关卡
     </div>
   </div>
-  <div class="boards-container touch-none">
+  <div class="boards-container touch-none relative">
     <div class="boards" id="boards"></div>
+    <div class="exit absolute left-1/4 bottom-0 w-1/2 h-1/5"></div>
   </div>
   <div class="controls flex justify-around select-none pt-4">
     <div class="text-box steps flex items-center justify-center px-4">
@@ -43,6 +41,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </div>
 </div>
 ${levelSelectDialog}
+${completeDialog}
 `
 
 document.getElementById('dialog-level-list')!.replaceChildren(
@@ -58,25 +57,32 @@ document.getElementById('dialog-level-list')!.replaceChildren(
     return btn
   })
 )
-document.getElementById('dialog-level-close')!.onclick = closeModal
+document.getElementById('dialog-level-close')!.onclick = closeSelectModal
 
-document.getElementById('select-btn')!.onclick = openModal
+document.getElementById('select-btn')!.onclick = function () {
+  document.getElementById('levelSelectModal')!.style.display = 'flex'
+}
+
+document.getElementById('close-complete-modal-btn')!.onclick = function () {
+  //@ts-ignore
+  this.style.display = 'none'
+}
 
 function selectLevel(index: number) {
   const selectedLevel = initBoardFayaa[index]
   console.log('选择了关卡：', selectedLevel.name)
-  const game = new Game(selectedLevel)
+  game?.destroy()
+  game = new Game(selectedLevel)
   document.getElementById('level-info')!.innerText = `${game.currentLevel}、${game.currentLevelName}`
   const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement
   resetBtn.onclick = () => game.init()
   resetBtn.disabled = false
-  closeModal() // 选择后关闭弹窗
+  closeSelectModal() // 选择后关闭弹窗
+  setTimeout(() => {
+    game.move(3, 4, 2, 4)
+  }, 2e3)
 }
 
-function closeModal() {
+function closeSelectModal() {
   document.getElementById('levelSelectModal')!.style.display = 'none'
-}
-
-function openModal() {
-  document.getElementById('levelSelectModal')!.style.display = 'flex'
 }
