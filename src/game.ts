@@ -8,6 +8,7 @@ import feng from '/imgs/凤a.png?url'
 import ya from '/imgs/牙a.png?url'
 import biao from '/imgs/镖a.png?url'
 import interact from 'interactjs'
+import { Tuple } from './utils'
 
 const pieceMap: Record<string, string> = {
   // '2x2': [hua],
@@ -55,6 +56,11 @@ export class Game {
   readonly cols = 4
   private _steps = 0
   private boardState: BoardState = []
+
+  public get boardStateString(): string {
+    return this.boardState.map(e => e.map(e => (e ? e : '@')).join('')).join('')
+  }
+
   private pieces: Record<string, Block> = {}
   private boardDom!: HTMLDivElement
   private stepsDom!: HTMLSpanElement
@@ -111,9 +117,9 @@ export class Game {
           }
           this.pieces[block] = {
             letter: block,
-            dom: this.createPiece(src, x + 1, y + 1, width, height),
-            gridX: x,
-            gridY: y,
+            dom: this.createPiece(src, x, y, width, height),
+            gridX: x + 1,
+            gridY: y + 1,
             width,
             height
           } as any
@@ -121,6 +127,7 @@ export class Game {
         }
       }
     }
+    console.log(this.boardState)
     this.boardDom.replaceChildren(...Object.values(this.pieces).map(e => e.dom))
   }
 
@@ -140,28 +147,36 @@ export class Game {
   }
 
   private addListenMove(block: Block) {
-    const { letter, dom, gridX: x, gridY: y, width, height } = block
-    let moveSteps: [number, number, number, number] = [0, 0, 0, 0]
-    let currentGridX = x,
-      currentGridY = y
+    const { letter, dom, gridX, gridY, width, height } = block
+    let moveSteps: Tuple<number, 4> = [0, 0, 0, 0]
+    let currentGridX = gridX,
+      currentGridY = gridY
     let originalX: number, originalY: number
     let moveX: undefined | boolean
     let gridWidth: number, gridHeight: number
+    let animeTimeout: number
+    let animeTimeoutFunc: undefined | ((breakAnime?: true) => void)
     block.interactObj = interact(dom).draggable({
       listeners: {
         start: event => {
           event.preventDefault()
-          dom.style.transition = 'none'
-          const gridArea = dom.style.gridArea.split('/')
-          currentGridY = parseInt(gridArea[0], 10) - 1
-          currentGridX = parseInt(gridArea[1], 10) - 1
-          moveSteps = this.getMoveSteps(currentGridX, currentGridY, width, height)
           const rect = dom.getBoundingClientRect()
-          originalX = rect.x
-          originalY = rect.y
           gridWidth = rect.width / width
           gridHeight = rect.height / height
-          console.log(event)
+          if (animeTimeoutFunc) {
+            clearTimeout(animeTimeout)
+            animeTimeoutFunc(true)
+          }
+          originalX = rect.x
+          originalY = rect.y
+
+          dom.style.transition = 'none'
+          // let gridArea = dom.style.gridArea.split('/') as Tuple<string, 4>
+          currentGridY = block.gridY
+          currentGridX = block.gridX
+          console.log(block)
+
+          moveSteps = this.getMoveSteps(currentGridX - 1, currentGridY - 1, width, height)
 
           console.log(moveSteps)
         },
@@ -196,18 +211,22 @@ export class Game {
           const ty = Math.round(((targetRect.y - rect.y) / rect.height) * this.rows)
           console.log(tx + 1, ty + 1)
 
-          if (tx != currentGridX || ty != currentGridY) {
-            setTimeout(() => {
-              dom.style.gridArea = `${ty + 1} / ${tx + 1} / ${ty + 1 + height} / ${tx + 1 + width}`
-              dom.style.transition = 'none'
-              dom.style.transform = 'translate(0px, 0px)'
-              block.gridX = tx + 1
-              block.gridY = ty + 1
-              this.steps++
-              this.checkWin()
-            }, 350)
-            for (let i = currentGridX; i < currentGridX + width; i++) {
-              for (let j = currentGridY; j < currentGridY + height; j++) {
+          if (tx != currentGridX - 1 || ty != currentGridY - 1) {
+            animeTimeout = setTimeout(
+              (animeTimeoutFunc = () => {
+                dom.style.gridArea = `${ty + 1} / ${tx + 1} / ${ty + 1 + height} / ${tx + 1 + width}`
+                dom.style.transition = 'none'
+                dom.style.transform = 'translate(0px, 0px)'
+                animeTimeoutFunc = undefined
+                block.gridX = tx + 1
+                block.gridY = ty + 1
+                this.steps++
+                this.checkWin()
+              }),
+              350
+            )
+            for (let i = currentGridX - 1; i < currentGridX - 1 + width; i++) {
+              for (let j = currentGridY - 1; j < currentGridY - 1 + height; j++) {
                 this.boardState[j][i] = null
               }
             }
@@ -292,6 +311,8 @@ export class Game {
   }
 
   private createPiece(src: string, x: number, y: number, width: number, height: number) {
+    x++
+    y++
     // return `<div class="piece" style="grid-area:${y}/${x}/${y + height}/${x + width}">${src.includes('<') ? src : `<img src="${src}" alt="piece" />`} </div>`
     //改为返回dom
     const dom = document.createElement('div')
