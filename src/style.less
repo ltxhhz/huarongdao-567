@@ -89,9 +89,40 @@ body {
   }
 }
 
-.exit{
-  background: radial-gradient(farthest-side, #6ea770,#6ea770, #5c9267);
+.exit {
+  background: radial-gradient(farthest-side, #6ea770, #6ea770, #5c9267);
   box-shadow: inset 0px 0px 13px 15px #53835d;
   box-sizing: border-box;
   border: 2px solid #999999;
+}
+
+@keyframes qPop {
+  0% {
+    transform: scale(0.8, 1.1);
+  }
+
+  20% {
+    transform: scale(1.1, 0.8);
+  }
+
+  40% {
+    transform: scale(0.8, 1.1);
+  }
+
+  60% {
+    transform: scale(1.1, 0.8);
+  }
+
+  80% {
+    transform: scale(0.8, 1.1);
+  }
+
+  100% {
+    transform: scale(1, 1);
+  }
+
+}
+
+.q-pop {
+  animation: qPop .5s;
 }

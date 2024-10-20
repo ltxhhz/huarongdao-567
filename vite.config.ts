@@ -4,5 +4,8 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 3001
   },
-  assetsInclude: ['**/*.html']
+  // assetsInclude: ['**/*.html']
+  esbuild: {
+    pure: ['console.log']
+  }
 })

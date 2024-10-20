@@ -1,10 +1,10 @@
 import './style.less'
 
-import t_an from '../public/imgs/t暗.png?url'
-import t_ying from '../public/imgs/t影.png?url'
-import t_hua from '../public/imgs/t华.png?url'
-import t_rong from '../public/imgs/t容.png?url'
-import t_dao from '../public/imgs/t道.png?url'
+import t_an from '/imgs/t暗.png?url'
+import t_ying from '/imgs/t影.png?url'
+import t_hua from '/imgs/t华.png?url'
+import t_rong from '/imgs/t容.png?url'
+import t_dao from '/imgs/t道.png?url'
 
 import levelSelectDialog from './level-select-dialog.html?raw'
 import completeDialog from './complete-dialog.html?raw'
@@ -33,7 +33,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div class="exit absolute left-1/4 bottom-0 w-1/2 h-1/5"></div>
   </div>
   <div class="controls flex justify-around select-none pt-4">
-    <div class="text-box steps flex items-center justify-center px-4">
+    <div id="steps-container" class="text-box steps flex items-center justify-center px-4">
       步数：<span id="steps">0</span>
     </div>
     <button class="text-box py-2 px-4 rounded-lg disabled:opacity-75" id="reset-btn" disabled>重置</button>
@@ -65,9 +65,17 @@ document.getElementById('select-btn')!.onclick = function () {
 
 document.getElementById('close-complete-modal-btn')!.onclick = function () {
   //@ts-ignore
-  this.style.display = 'none'
+  document.getElementById('game-complete-modal')!.style.display = 'none'
 }
 
+document.getElementById('steps-container')!.onclick = function () {
+  //@ts-ignore
+  this.classList.add('q-pop')
+  setTimeout(() => {
+    //@ts-ignore
+    this.classList.remove('q-pop')
+  }, 600)
+}
 function selectLevel(index: number) {
   const selectedLevel = initBoardFayaa[index]
   console.log('选择了关卡：', selectedLevel.name)
@@ -78,9 +86,9 @@ function selectLevel(index: number) {
   resetBtn.onclick = () => game.init()
   resetBtn.disabled = false
   closeSelectModal() // 选择后关闭弹窗
-  setTimeout(() => {
-    game.move(3, 4, 2, 4)
-  }, 2e3)
+  // setTimeout(() => {
+  //   game.move(3, 4, 2, 4)
+  // }, 2e3)
 }
 
 function closeSelectModal() {
