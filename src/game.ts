@@ -64,7 +64,7 @@ export class Game {
   private pieces: Record<string, Block> = {}
   private boardDom!: HTMLDivElement
   private stepsDom!: HTMLSpanElement
-  private isGameOver = false
+  // private isGameOver = false
   private timer!: number
 
   public get currentLevel(): number {
@@ -88,7 +88,7 @@ export class Game {
     this.init()
   }
   public init() {
-    this.isGameOver = false
+    // this.isGameOver = false
     this._steps = 0
     this.boardDom = document.getElementById('boards') as HTMLDivElement
     this.stepsDom = document.getElementById('steps')!
@@ -337,7 +337,7 @@ export class Game {
 
   //结束游戏
   private endGame() {
-    this.isGameOver = true
+    // this.isGameOver = true
     Object.values(this.pieces).forEach(e => {
       e.interactObj.unset()
     })
