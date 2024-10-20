@@ -111,7 +111,7 @@ export class Game {
           }
           if (src.length === 1) {
             src = pieceMap[src]
-          } else if (src.includes('-')) {
+          } else if (src.length == 3 && src.includes('-')) {
             const [start, end] = src.split('-')
             src = pieceMap[String.fromCharCode(Math.floor(Math.random() * (end.charCodeAt(0) - start.charCodeAt(0) + 1) + start.charCodeAt(0)))!]
           }
