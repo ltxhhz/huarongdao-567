@@ -56,6 +56,7 @@ export class Game {
   readonly cols = 4
   private _steps = 0
   private boardState: BoardState = []
+  private history: Tuple<number, 4>[] = []
 
   public get boardStateString(): string {
     return this.boardState.map(e => e.map(e => (e ? e : '@')).join('')).join('')
@@ -221,6 +222,9 @@ export class Game {
                 block.gridX = tx + 1
                 block.gridY = ty + 1
                 this.steps++
+                this.history.push([currentGridX - 1, currentGridY - 1, tx, ty])
+                console.log(this.history)
+
                 this.checkWin()
               }),
               350
@@ -343,7 +347,7 @@ export class Game {
     })
   }
 
-  move(x: number, y: number, tx: number, ty: number) {
+  move(x: number, y: number, tx: number, ty: number, duration?: number) {
     const letter = this.boardState[y][x]!
     const { width, height, dom, gridX, gridY } = this.pieces[letter]
     const steps = this.getMoveSteps(x, y, width, height)
@@ -359,9 +363,9 @@ export class Game {
         dom.style.transform = 'translate(0px, 0px)'
         this.steps++
         this.checkWin()
-      }, 350)
-      for (let i = gridX; i < gridX + width; i++) {
-        for (let j = gridY; j < gridY + height; j++) {
+      }, duration || 350)
+      for (let i = gridX - 1; i < gridX - 1 + width; i++) {
+        for (let j = gridY - 1; j < gridY - 1 + height; j++) {
           this.boardState[j][i] = null
         }
       }
@@ -372,7 +376,7 @@ export class Game {
       }
       console.log(this.boardState)
       dom.style.transform = `translate(${(tx / this.cols) * board.clientWidth + rect.x - targetRect.x}px, ${(ty / this.rows) * board.clientHeight + rect.y - targetRect.y}px)`
-      dom.style.transition = 'all 0.3s ease'
+      dom.style.transition = `all ${duration || 300}ms ease`
     } else {
       throw new Error('移动不合法')
     }

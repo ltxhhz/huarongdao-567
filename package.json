@@ -10,6 +10,7 @@
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
+    "@types/node": "^22.8.1",
     "autoprefixer": "^10.4.20",
     "gh-pages": "^6.2.0",
     "less": "^4.2.0",
