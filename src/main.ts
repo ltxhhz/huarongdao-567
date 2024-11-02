@@ -1,16 +1,17 @@
 import './style.less'
 
-import t_an from '/imgs/t暗.png?url'
-import t_ying from '/imgs/t影.png?url'
-import t_hua from '/imgs/t华.png?url'
-import t_rong from '/imgs/t容.png?url'
-import t_dao from '/imgs/t道.png?url'
+import t_an from '/imgs/min/t暗.png?url'
+import t_ying from '/imgs/min/t影.png?url'
+import t_hua from '/imgs/min/t华.png?url'
+import t_rong from '/imgs/min/t容.png?url'
+import t_dao from '/imgs/min/t道.png?url'
 
 import levelSelectDialog from './level-select-dialog.html?raw'
 import completeDialog from './complete-dialog.html?raw'
 
 import { initBoardFayaa } from './klotski.board.fayaa'
 import { Game } from './game'
+import { Tuple } from './utils'
 
 let game: Game
 
@@ -86,9 +87,108 @@ function selectLevel(index: number) {
   resetBtn.onclick = () => game.init()
   resetBtn.disabled = false
   closeSelectModal() // 选择后关闭弹窗
-  // setTimeout(() => {
-  //   game.move(3, 4, 2, 4)
-  // }, 2e3)
+  if (import.meta.env.DEV) {
+    //@ts-ignore
+    window.a = async () => {
+      // game.move(3, 4, 2, 4)
+      const arr: Tuple<number, 4>[] = [
+        [3, 4, 2, 4],
+        [3, 2, 3, 3],
+        [1, 2, 2, 2],
+        [1, 3, 1, 4],
+        [0, 2, 1, 2],
+        [0, 4, 0, 3],
+        [1, 4, 0, 4],
+        [1, 2, 1, 3],
+        [2, 2, 0, 2],
+        [2, 3, 2, 2],
+        [2, 2, 3, 2],
+        [2, 4, 2, 2],
+        [1, 3, 2, 3],
+        [0, 3, 1, 3],
+        [1, 3, 1, 4],
+        [0, 2, 0, 3],
+        [2, 2, 0, 2],
+        [3, 2, 1, 2],
+        [2, 3, 2, 2],
+        [3, 3, 3, 2],
+        [1, 4, 3, 4],
+        [0, 4, 2, 4],
+        [0, 3, 0, 4],
+        [1, 2, 1, 3],
+        [1, 3, 0, 3],
+        [2, 2, 1, 2],
+        [3, 2, 2, 2],
+        [3, 0, 3, 2],
+        [1, 0, 2, 0],
+        [0, 0, 1, 0],
+        [0, 2, 0, 0],
+        [0, 3, 0, 1],
+        [1, 2, 0, 2],
+        [1, 0, 1, 2],
+        [2, 0, 1, 0],
+        [3, 2, 3, 0],
+        [2, 2, 3, 2],
+        [2, 4, 2, 2],
+        [3, 4, 2, 4],
+        [2, 4, 2, 3],
+        [0, 4, 2, 4],
+        [0, 2, 0, 3],
+        [1, 2, 1, 3],
+        [2, 2, 0, 2],
+        [1, 0, 1, 1],
+        [0, 0, 2, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 2, 0, 0],
+        [0, 3, 0, 1],
+        [1, 3, 0, 3],
+        [2, 3, 1, 3],
+        [1, 3, 1, 4],
+        [1, 1, 1, 2],
+        [2, 0, 2, 1],
+        [2, 1, 1, 1],
+        [3, 0, 2, 0],
+        [3, 2, 3, 0],
+        [1, 2, 2, 2],
+        [1, 1, 1, 2],
+        [1, 0, 1, 1],
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [0, 3, 0, 2],
+        [1, 4, 0, 4],
+        [1, 2, 1, 4],
+        [2, 2, 1, 2],
+        [3, 0, 3, 2],
+        [2, 0, 3, 0],
+        [1, 0, 2, 0],
+        [1, 1, 2, 1],
+        [0, 0, 1, 0],
+        [0, 2, 0, 0],
+        [1, 2, 0, 2],
+        [2, 1, 2, 3],
+        [2, 0, 2, 2],
+        [3, 0, 2, 0],
+        [3, 2, 3, 0],
+        [2, 3, 3, 3],
+        [3, 3, 3, 2],
+        [2, 4, 2, 3],
+        [1, 4, 3, 4],
+        [0, 4, 2, 4],
+        [0, 2, 0, 3],
+        [2, 2, 0, 2],
+        [3, 2, 1, 2],
+        [2, 3, 2, 2],
+        [2, 4, 2, 3],
+        [2, 3, 3, 3],
+        [0, 3, 1, 3]
+      ]
+      for (const item of arr) {
+        game.move(...item, 100)
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+    }
+  }
 }
 
 function closeSelectModal() {

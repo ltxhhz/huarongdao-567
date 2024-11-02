@@ -1,3 +1,4 @@
+// https://github.com/SimonHung/Klotski/blob/master/klotski.board.fayaa.js
 //---------------------------------------------------------------------------------------
 //  0----------> X        
 //  |"HAAI"
