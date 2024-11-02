@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "build-gh": "tsc && vite build --base /huarongdao-567/"
   },
   "devDependencies": {
     "@types/node": "^22.8.1",
@@ -17,7 +18,7 @@
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.5.3",
-    "vite": "^5.4.8"
+    "vite": "^5.4.10"
   },
   "dependencies": {
     "interactjs": "^1.10.27"
