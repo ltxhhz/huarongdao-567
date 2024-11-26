@@ -9,9 +9,11 @@ import t_dao from '/imgs/min/t道.png?url'
 import levelSelectDialog from './level-select-dialog.html?raw'
 import completeDialog from './complete-dialog.html?raw'
 
-import { initBoardFayaa } from './klotski.board.fayaa'
+import { boards, boardsSorted, classicBoards, Level } from './boards'
+// import { initBoardFayaa } from './boards/klotski.board.fayaa'
 import { Game } from './game'
-import { Tuple } from './utils'
+import { boardFlip, getBoardDiff, key2Board1, Tuple } from './utils'
+
 
 let game: Game
 
@@ -25,7 +27,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <img src="${t_rong}" alt="容" />
       <img src="${t_dao}" alt="道" />
     </div>
-    <div id="level-info" class="text-box inline-flex items-center justify-center text-lg my-2">
+    <div id="level-info" class="text-box inline-flex items-center justify-center text-lg my-2 px-2">
       请选择关卡
     </div>
   </div>
@@ -44,20 +46,8 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 ${levelSelectDialog}
 ${completeDialog}
 `
+console.log(boards)
 
-document.getElementById('dialog-level-list')!.replaceChildren(
-  ...initBoardFayaa.map((level, index) => {
-    const btn = document.createElement('button')
-    btn.classList.add('bg-gray-100', 'hover:bg-blue-100', 'p-4', 'rounded-lg', 'shadow')
-    btn.dataset.level = index + ''
-    btn.onclick = () => selectLevel(index)
-    btn.innerHTML = `
-        <div class="text-lg font-medium">${level.name}</div>
-        <div class="text-sm text-gray-500">关卡 ${level.level}</div>
-      `
-    return btn
-  })
-)
 document.getElementById('dialog-level-close')!.onclick = closeSelectModal
 
 document.getElementById('select-btn')!.onclick = function () {
@@ -77,12 +67,15 @@ document.getElementById('steps-container')!.onclick = function () {
     this.classList.remove('q-pop')
   }, 600)
 }
+
+initTabs()
+
 function selectLevel(index: number) {
-  const selectedLevel = initBoardFayaa[index]
-  console.log('选择了关卡：', selectedLevel.name)
+  const selectedLevel = boardsSorted[index]
+  console.log('选择了关卡：', selectedLevel)
   game?.destroy()
   game = new Game(selectedLevel)
-  document.getElementById('level-info')!.innerText = `${game.currentLevel}、${game.currentLevelName}`
+  document.getElementById('level-info')!.innerText = `${game.currentLevelName}`
   const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement
   resetBtn.onclick = () => game.init()
   resetBtn.disabled = false
@@ -193,4 +186,61 @@ function selectLevel(index: number) {
 
 function closeSelectModal() {
   document.getElementById('levelSelectModal')!.style.display = 'none'
+}
+
+function initTabs() {
+  const tabsNum = 5
+  const eachSum = Math.floor(boardsSorted.length / tabsNum)
+  const tabsContent: Level[][] = []
+  const dialogTabsEl = document.getElementById('dialog-level-tabs')!
+  const dialogListEl = document.getElementById('dialog-level-list')!
+  // let selectedIndex = 0
+
+  for (let i = 0; i < tabsNum; i++) {
+    tabsContent.push(boardsSorted.slice(i * eachSum, i == tabsNum - 1 ? undefined : (i + 1) * eachSum))
+  }
+  tabsContent.push(classicBoards)
+  const btns: HTMLButtonElement[] = []
+  tabsContent.forEach((e, i, arr) => {
+    const btn = document.createElement('button')
+    btns.push(btn)
+    btn.innerText = i == arr.length - 1 ? '经典' : `等级 ${i + 1}`
+    btn.className = `inline-flex items-center h-10 px-4 -mb-px text-sm text-center bg-transparent border-b-2 focus:outline-none sm:text-base whitespace-nowrap ${
+      i == 0 ? 'text-blue-600 border-blue-500 dark:border-blue-400 dark:text-blue-300' : 'text-gray-700 dark:text-white whitespace-nowrap cursor-base hover:border-gray-400'
+    }`
+    btn.onclick = () => {
+      btns.forEach((e, i1) => {
+        e.className = `inline-flex items-center h-10 px-4 -mb-px text-sm text-center bg-transparent border-b-2 focus:outline-none sm:text-base whitespace-nowrap ${
+          i == i1 ? 'text-blue-600 border-blue-500 dark:border-blue-400 dark:text-blue-300' : 'text-gray-700 dark:text-white whitespace-nowrap cursor-base hover:border-gray-400'
+        }`
+      })
+      dialogListEl.replaceChildren(
+        ...e.map((level, index) => {
+          const btn = document.createElement('button')
+          btn.classList.add('bg-gray-100', 'hover:bg-blue-100', 'p-4', 'rounded-lg', 'shadow')
+          btn.dataset.level = index + ''
+          btn.onclick = () => selectLevel(i * eachSum + index)
+          btn.innerHTML = `
+        <div class="text-lg font-medium">${level.name}</div>
+        <div class="text-sm text-gray-500">关卡 ${index + 1}</div>
+      `
+          return btn
+        })
+      )
+    }
+    dialogTabsEl.appendChild(btn)
+  })
+  dialogListEl.replaceChildren(
+    ...tabsContent[0].map((level, index) => {
+      const btn = document.createElement('button')
+      btn.classList.add('bg-gray-100', 'hover:bg-blue-100', 'p-4', 'rounded-lg', 'shadow')
+      btn.dataset.level = index + ''
+      btn.onclick = () => selectLevel(0 * eachSum + index)
+      btn.innerHTML = `
+        <div class="text-lg font-medium">${level.name}</div>
+        <div class="text-sm text-gray-500">关卡 ${index + 1}</div>
+      `
+      return btn
+    })
+  )
 }

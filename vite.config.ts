@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import path from 'path'
 
 export default defineConfig({
   // base: process.env.NODE_ENV == 'development' ? undefined : '/huarongdao-567',
@@ -9,5 +10,10 @@ export default defineConfig({
   // assetsInclude: ['**/*.html']
   esbuild: {
     pure: ['console.log']
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    }
   }
 })

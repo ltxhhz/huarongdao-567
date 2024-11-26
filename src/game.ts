@@ -1,4 +1,4 @@
-import { Level } from './klotski.board.fayaa'
+import { Level } from './boards'
 
 import niao from '/imgs/min/鸟a.png?url'
 import hua from '/imgs/min/华a.png?url'
@@ -8,7 +8,7 @@ import feng from '/imgs/min/凤a.png?url'
 import ya from '/imgs/min/牙a.png?url'
 import biao from '/imgs/min/镖a.png?url'
 import interact from 'interactjs'
-import { Tuple } from './utils'
+import { ArrowDirection, Tuple } from './utils'
 
 const pieceMap: Record<string, string> = {
   // '2x2': [hua],
@@ -69,7 +69,8 @@ export class Game {
   private timer!: number
 
   public get currentLevel(): number {
-    return this.level.level
+    //@ts-ignore
+    return this.level.level || 0
   }
 
   public get currentLevelName(): string {
@@ -254,7 +255,7 @@ export class Game {
     })
   }
   /**
-   * 获取移动步数 [x左移,x右移,y上移,y下移]
+   * 获取可移动步数 [x左移,x右移,y上移,y下移]
    */
   private getMoveSteps(x: number, y: number, width: number, height: number): [number, number, number, number] {
     const steps: number[] = []
@@ -381,6 +382,7 @@ export class Game {
       throw new Error('移动不合法')
     }
   }
+
   destroy() {
     clearInterval(this.timer)
   }

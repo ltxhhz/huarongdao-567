@@ -1,6 +1,6 @@
 // https://github.com/SimonHung/Klotski/blob/master/klotski.board.fayaa.js
 //---------------------------------------------------------------------------------------
-//  0----------> X        
+//  0----------> X
 //  |"HAAI"
 //  |"HAAI"
 //  |"JBBK"
@@ -17,10 +17,22 @@
 //    AA                    H  I  J  K  L  M
 //---------------------------------------------------------------------------------------
 
+export interface LevelFayaa {
+  level: number
+  name: string
+  mini: number
+  user: string
+  url_name: string
+  url: string
+  board: string
+  empty: number
+}
+
 //==============================================================
 // Below table extract from http://fayaa.com/youxi/hrd/
 //==============================================================
-export var initBoardFayaa:Level[] = [
+// prettier-ignore
+export const initBoardFayaa: LevelFayaa[] = [
 	{
 		level: 1,
 		name: "橫刀立馬",
@@ -6201,15 +6213,8 @@ export var initBoardFayaa:Level[] = [
 			"IQDD",
 		empty: 2
 	}
-];
+]
 
-export interface Level {
-	level: number;
-	name: string;
-	mini: number
-	user: string
-	url_name: string
-	url: string
-	board: string
-	empty: number
-} 
+console.log(`levels: ${initBoardFayaa.length}`)
+console.log(`mini: ${initBoardFayaa.map(l => l.mini).reduce((a, b) => Math.min(a, b), Infinity)}`)
+console.log(`maxi: ${initBoardFayaa.map(l => l.mini).reduce((a, b) => Math.max(a, b), -Infinity)}`)
