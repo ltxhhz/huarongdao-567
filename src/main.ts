@@ -71,7 +71,10 @@ document.getElementById('steps-container')!.onclick = function () {
 initTabs()
 
 function selectLevel(index: number) {
-  const selectedLevel = boardsSorted[index]
+  let selectedLevel = boardsSorted[index]
+  if (index > boardsSorted.length) {
+    selectedLevel = classicBoards[index - boardsSorted.length]
+  }
   console.log('选择了关卡：', selectedLevel)
   game?.destroy()
   game = new Game(selectedLevel)
