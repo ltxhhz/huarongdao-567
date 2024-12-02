@@ -68,6 +68,8 @@ export class Game {
   // private isGameOver = false
   private timer!: number
 
+  private movingBlock: Block | undefined
+
   public get currentLevel(): number {
     //@ts-ignore
     return this.level.level || 0
@@ -158,10 +160,17 @@ export class Game {
     let gridWidth: number, gridHeight: number
     let animeTimeout: number
     let animeTimeoutFunc: undefined | ((breakAnime?: true) => void)
+    let moving = false
     block.interactObj = interact(dom).draggable({
       listeners: {
         start: event => {
           event.preventDefault()
+          if (this.movingBlock && this.movingBlock != block) {
+            moving = false
+            return
+          }
+          moving = true
+          this.movingBlock = block
           const rect = dom.getBoundingClientRect()
           gridWidth = rect.width / width
           gridHeight = rect.height / height
@@ -182,8 +191,11 @@ export class Game {
 
           console.log(moveSteps)
         },
-        move(event) {
+        move: event => {
           event.preventDefault()
+          if (this.movingBlock && this.movingBlock != block || !moving) {
+            return
+          }
           let x = (parseFloat(dom.getAttribute('data-x')!) || 0) + event.dx
           let y = (parseFloat(dom.getAttribute('data-y')!) || 0) + event.dy
           if (moveX == undefined) {
@@ -203,6 +215,9 @@ export class Game {
         },
         end: event => {
           event.preventDefault()
+          if (this.movingBlock && this.movingBlock != block || !moving) {
+            return
+          }
           const board = this.boardDom
           const rect = board.getBoundingClientRect()
           const targetRect = dom.getBoundingClientRect()
@@ -250,6 +265,7 @@ export class Game {
           dom.removeAttribute('data-x')
           dom.removeAttribute('data-y')
           moveX = undefined
+          this.movingBlock = undefined
         }
       }
     })
