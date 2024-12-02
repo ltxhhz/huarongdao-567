@@ -72,7 +72,7 @@ initTabs()
 
 function selectLevel(index: number) {
   let selectedLevel = boardsSorted[index]
-  if (index > boardsSorted.length) {
+  if (index >= boardsSorted.length) {
     selectedLevel = classicBoards[index - boardsSorted.length]
   }
   console.log('选择了关卡：', selectedLevel)
